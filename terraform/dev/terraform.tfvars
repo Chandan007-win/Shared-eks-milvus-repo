@@ -1,0 +1,22 @@
+aws_region         = "ap-south-1"
+cluster_name       = "shared-dev-eks"
+environment        = "dev"
+kubernetes_version = "1.33"
+vpc_cidr           = "10.20.0.0/16"
+
+node_instance_types = ["t3.large"]
+node_desired_size   = 2
+node_min_size       = 2
+node_max_size       = 3
+
+milvus_namespace            = "milvus"
+milvus_service_account_name = "milvus-s3-access-sa"
+
+s3_bucket_name = "aws-milvus-s3-chandan-20260420"
+
+tags = {
+  Terraform   = "true"
+  Project     = "milvus"
+  Environment = "dev"
+  Owner       = "chandan"
+}
