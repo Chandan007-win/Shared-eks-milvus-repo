@@ -1,12 +1,11 @@
-variable "aws_region" 
+variable "aws_region" {
   type        = string
-  description = "AWS region for all resources"
+  description = "AWS region"
   default     = "ap-south-1"
 }
 
 variable "cluster_name" {
   type        = string
-  description = "Shared EKS cluster name"
   default     = "shared-dev-eks"
 }
 
@@ -66,8 +65,6 @@ variable "milvus_service_account_name" {
 
 variable "s3_bucket_name" {
   type        = string
-  description = "Unique S3 bucket name for Milvus object storage"
-  default     = "aws-milvus-s3-123"
 }
 
 variable "tags" {
