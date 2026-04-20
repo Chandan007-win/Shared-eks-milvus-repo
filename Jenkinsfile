@@ -60,11 +60,17 @@ pipeline {
                 }
             }
             steps {
-                dir("${TF_DIR}") {
-                    sh '''
-                        set -e
-                        terraform plan -out=tfplan
-                    '''
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: "${AWS_CREDENTIALS_ID}"
+                ]]) {
+                    dir("${TF_DIR}") {
+                        sh '''
+                            set -e
+                            aws sts get-caller-identity
+                            terraform plan -out=tfplan
+                        '''
+                    }
                 }
             }
         }
@@ -90,6 +96,7 @@ pipeline {
                     dir("${TF_DIR}") {
                         sh '''
                             set -e
+                            aws sts get-caller-identity
                             terraform apply -auto-approve tfplan
                         '''
                     }
@@ -118,6 +125,7 @@ pipeline {
                     dir("${TF_DIR}") {
                         sh '''
                             set -e
+                            aws sts get-caller-identity
                             terraform destroy -auto-approve
                         '''
                     }
@@ -133,12 +141,17 @@ pipeline {
                 }
             }
             steps {
-                script {
-                    env.AWS_REGION_VALUE = sh(script: "cd ${TF_DIR} && terraform output -raw aws_region", returnStdout: true).trim()
-                    env.CLUSTER_NAME_VALUE = sh(script: "cd ${TF_DIR} && terraform output -raw cluster_name", returnStdout: true).trim()
-                    env.VPC_ID_VALUE = sh(script: "cd ${TF_DIR} && terraform output -raw vpc_id", returnStdout: true).trim()
-                    env.S3_BUCKET_NAME_VALUE = sh(script: "cd ${TF_DIR} && terraform output -raw s3_bucket_name", returnStdout: true).trim()
-                    env.MILVUS_IRSA_ROLE_ARN_VALUE = sh(script: "cd ${TF_DIR} && terraform output -raw milvus_irsa_role_arn", returnStdout: true).trim()
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: "${AWS_CREDENTIALS_ID}"
+                ]]) {
+                    script {
+                        env.AWS_REGION_VALUE = sh(script: "cd ${TF_DIR} && terraform output -raw aws_region", returnStdout: true).trim()
+                        env.CLUSTER_NAME_VALUE = sh(script: "cd ${TF_DIR} && terraform output -raw cluster_name", returnStdout: true).trim()
+                        env.VPC_ID_VALUE = sh(script: "cd ${TF_DIR} && terraform output -raw vpc_id", returnStdout: true).trim()
+                        env.S3_BUCKET_NAME_VALUE = sh(script: "cd ${TF_DIR} && terraform output -raw s3_bucket_name", returnStdout: true).trim()
+                        env.MILVUS_IRSA_ROLE_ARN_VALUE = sh(script: "cd ${TF_DIR} && terraform output -raw milvus_irsa_role_arn", returnStdout: true).trim()
+                    }
                 }
             }
         }
@@ -206,7 +219,7 @@ pipeline {
                           --approve
 
                         helm repo add eks https://aws.github.io/eks-charts || true
-                        helm repo update eks
+                        helm repo update
 
                         wget -q https://raw.githubusercontent.com/aws/eks-charts/master/stable/aws-load-balancer-controller/crds/crds.yaml -O crds.yaml
                         kubectl apply -f crds.yaml
