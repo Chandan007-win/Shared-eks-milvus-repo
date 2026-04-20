@@ -12,7 +12,7 @@ node_max_size       = 3
 milvus_namespace            = "milvus"
 milvus_service_account_name = "milvus-s3-access-sa"
 
-s3_bucket_name = "aws-milvus-s3-123""
+s3_bucket_name = "aws-milvus-s3-chandan-20260420"
 
 tags = {
   Terraform   = "true"
